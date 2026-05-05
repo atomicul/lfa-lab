@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
-from typing import List, Iterable, Tuple
-from queue import Queue
+from collections.abc import Iterable
+from collections import deque
 
 
 def main():
@@ -21,17 +21,17 @@ def main():
 
 
 class Node:
-    transitions: List[Tuple[str, Node]]
+    transitions: list[tuple[str, Node]]
 
     def __init__(self) -> None:
         self.transitions = []
 
     def check(self, word: str) -> Iterable[Node]:
-        q: Queue[Tuple[Node, str]] = Queue()
-        q.put((self, word))
+        q: deque[tuple[Node, str]] = deque()
+        q.append((self, word))
 
-        while not q.empty():
-            node, word = q.get()
+        while q:
+            node, word = q.popleft()
 
             if not word:
                 yield node
@@ -43,10 +43,10 @@ class Node:
             nodes = [n for k, n in node.transitions if k == x]
 
             for n in nodes:
-                q.put((n, xs))
+                q.append((n, xs))
 
 
-def read_nfa() -> Tuple[Node, List[Node]]:
+def read_nfa() -> tuple[Node, list[Node]]:
     with open("nfa.txt", "r") as f:
         node_count = int(f.readline())
         nodes = [Node() for _ in range(node_count)]

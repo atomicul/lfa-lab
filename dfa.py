@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
 
-from typing import List, Dict, Optional, Tuple
-
 
 def main():
     initial_node, final_nodes = read_dfa()
@@ -22,12 +20,12 @@ def main():
 
 
 class Node:
-    transitions: Dict[str, Node]
+    transitions: dict[str, Node]
 
     def __init__(self) -> None:
         self.transitions = dict()
 
-    def check(self, word: str) -> Optional[Node]:
+    def check(self, word: str) -> Node | None:
         if not word:
             return self
 
@@ -42,7 +40,7 @@ class Node:
         return n.check(xs)
 
 
-def read_dfa() -> Tuple[Node, List[Node]]:
+def read_dfa() -> tuple[Node, list[Node]]:
     with open("dfa.txt", "r") as f:
         node_count = int(f.readline())
         nodes = [Node() for _ in range(node_count)]

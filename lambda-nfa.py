@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 
-from typing import List, Iterable, Optional, Set, Tuple
+from collections import deque
+from collections.abc import Iterable
 from itertools import chain
-from queue import Queue
 
 LAMBDA_SYMBOL = "$"
 
@@ -24,19 +24,19 @@ def main():
 
 
 class Node:
-    transitions: List[Tuple[str, Node]]
+    transitions: list[tuple[str, Node]]
 
     def __init__(self) -> None:
         self.transitions = []
 
     def check(self, word: str) -> Iterable[Node]:
-        q: Queue[Tuple[Node, str]] = Queue()
+        q: deque[tuple[Node, str]] = deque()
 
         for n in self.lambda_closure():
-            q.put((n, word))
+            q.append((n, word))
 
-        while not q.empty():
-            node, word = q.get()
+        while q:
+            node, word = q.popleft()
 
             if not word:
                 yield node
@@ -49,9 +49,9 @@ class Node:
             nodes = chain(*nodes)
 
             for n in nodes:
-                q.put((n, xs))
+                q.append((n, xs))
 
-    def lambda_closure(self, *, visited: Optional[Set[Node]] = None) -> Iterable[Node]:
+    def lambda_closure(self, *, visited: set[Node] | None = None) -> Iterable[Node]:
         if visited is None:
             visited = set()
 
@@ -68,7 +68,7 @@ class Node:
         yield self
 
 
-def read_nfa() -> Tuple[Node, List[Node]]:
+def read_nfa() -> tuple[Node, list[Node]]:
     with open("lambda-nfa.txt", "r") as f:
         node_count = int(f.readline())
         nodes = [Node() for _ in range(node_count)]
