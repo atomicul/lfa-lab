@@ -47,7 +47,26 @@ class Grammar:
     def productions_for(self, symbol: str) -> Iterable[Production]:
         return (p for p in self.productions if p.lhs == symbol)
 
+    def shortest_yield(self) -> dict[str, float]:
+        shortest: dict[str, float] = {t: 1 for t in self.terminals}
+        shortest.update({nt: float("inf") for nt in self.non_terminals})
+
+        while True:
+            for p in self.productions:
+                candidate = sum(shortest[s] for s in p.rhs)
+                if candidate < shortest[p.lhs]:
+                    shortest[p.lhs] = candidate
+                    break
+            else:
+                return shortest
+
+
     def words_of_length(self, length: int) -> Iterable[str]:
+        shortest = self.shortest_yield()
+
+        def min_length(form: tuple[str, ...]) -> float:
+            return sum(shortest[s] for s in form)
+
         start_form = (self.start,)
         visited: set[tuple[str, ...]] = {start_form}
         stack: list[tuple[str, ...]] = [start_form]
@@ -68,7 +87,7 @@ class Grammar:
             for production in self.productions_for(form[leftmost]):
                 expanded = form[:leftmost] + production.rhs + form[leftmost + 1 :]
 
-                if len(expanded) <= length and expanded not in visited:
+                if min_length(expanded) <= length and expanded not in visited:
                     visited.add(expanded)
                     stack.append(expanded)
 
